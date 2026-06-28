@@ -287,6 +287,15 @@ dap.adapters.gdb = {
     args = { "--interpreter=dap" },
 }
 
+vim.fn.sign_define("DapStopped", {
+    texthl = "Error",
+    linehl = "Visual",
+})
+
+vim.fn.sign_define("DapBreakpoint", {
+    text = "🛑",
+})
+
 local is_absolute_path = function(path)
     if vim.fn.has("win32") == 1 then
         return path:match("^%a+:[/\\]")
