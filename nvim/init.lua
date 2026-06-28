@@ -287,16 +287,37 @@ dap.adapters.gdb = {
     args = { "--interpreter=dap" },
 }
 
+local is_absolute_path = function(path)
+    if vim.fn.has("win32") == 1 then
+        return path:match("^%a+:[/\\]")
+    else
+        return path:find("^/")
+    end
+end
+
+local absolute_path_relative_to = function(path, relative_to)
+    path = vim.fs.normalize(path)
+    if is_absolute_path(path) then
+        return path
+    else
+        -- path is a relative path
+        return vim.fs.joinpath(relative_to, path)
+    end
+end
+
+-- returns the project config and the absolute path to the directory containing the config
 local get_project_config = function()
     local config_file = vim.fs.find(".de-config.lua", {
         upward = true,
         path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)),
     })
-    return config_file[1] and dofile(config_file[1])
+    if config_file[1] then
+        return dofile(config_file[1]), vim.fs.dirname(config_file[1])
+    end
 end
 
 local debug_run = function()
-    local project_config = get_project_config()
+    local project_config, directory = get_project_config()
     assert(project_config, "no project config found")
     local debug_config = project_config.debug
     assert(debug_config, "no debug config found")
@@ -308,6 +329,10 @@ local debug_run = function()
 
     for key, value in pairs(debug_config) do
         config[key] = value
+    end
+
+    if config.program then
+        config.program = absolute_path_relative_to(config.program, directory)
     end
 
     dap.run(config)
