@@ -170,6 +170,8 @@ vim.o.updatetime = 100
 vim.o.wrap = false
 vim.o.statusline = "%!v:lua.statusline()"
 
+local dap = require("dap")
+
 -- must be global to be callable from vimscript
 statusline = function()
     local window_id = vim.g.statusline_winid
@@ -213,6 +215,7 @@ statusline = function()
         .. git_head_component
         .. file_component
         .. " %#Normal#%r"
+        .. " " .. dap.status()
 end
 
 vim.diagnostic.config({
@@ -273,6 +276,37 @@ pick_file = function()
     telescope_builtin.find_files()
 end
 
+dap.adapters["lldb"] = {
+    type = "executable",
+    command = "lldb-dap",
+}
+
+local get_project_config = function()
+    local config_file = vim.fs.find(".de-config.lua", {
+        upward = true,
+        path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)),
+    })
+    return config_file[1] and dofile(config_file[1])
+end
+
+local debug_run = function()
+    local project_config = get_project_config()
+    assert(project_config, "no project config found")
+    local debug_config = project_config.debug
+    assert(debug_config, "no debug config found")
+    -- assert(type(debug_config.type) = "string", ) -- TODO consider asserting
+    local config = {
+        request = "launch",
+        name = "",
+    }
+
+    for key, value in pairs(debug_config) do
+        config[key] = value
+    end
+
+    dap.run(config)
+end
+
 -- normal mode keymaps
 for _, map in ipairs({
     { "^", "^9999zh" },
@@ -315,6 +349,9 @@ for _, map in ipairs({
         end
     end },
 
+    { "<C-Down>", dap.step_over },
+    { "<C-Up>", dap.step_out },
+
     { "<Leader>q", vim.diagnostic.setloclist },
     { "<Leader>wl", function()
         print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
@@ -326,6 +363,7 @@ for _, map in ipairs({
         vim.cmd("keepjumps normal! gggqG")
         vim.fn.winrestview(view)
     end },
+    { "<Leader>p", dap.toggle_breakpoint },
     -- see below for <Leader>b mapping
     { "<Leader>j", "!$jq<cr>" },
     { "<Leader>a", function()
@@ -336,6 +374,10 @@ for _, map in ipairs({
     end },
     { "<Leader>r", ":grep '\\b(<C-r><C-w>)\\b'<cr>" },
     { "<Leader>t", function() -- run t.sh
+        -- TODO figure out how to control whether to debug or use t.sh
+        debug_run()
+
+        --[[
         terminal_command = "te de; shopt -s expand_aliases; . t.sh"
 
         vim.cmd("wa")
@@ -347,6 +389,7 @@ for _, map in ipairs({
         else
             vim.cmd("vs +" .. string.gsub(terminal_command, " ", "\\ "))
         end
+        ]]
     end },
     { "<Leader>g", ":Git " },
     { "<Leader>n", ":vs t.sh<cr>" },
@@ -454,3 +497,8 @@ for _, autocommand in ipairs({
         callback = autocommand[3],
     })
 end
+
+vim.api.nvim_create_autocmd("User", {
+    pattern = "DapProgressUpdate",
+    command = "redrawstatus"
+})

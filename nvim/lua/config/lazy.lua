@@ -58,6 +58,7 @@ require("lazy").setup({
             -- it work correctly in all situations.
             lazy = false,
         },
+        { "mfussenegger/nvim-dap" },
     },
     -- Configure any other settings here. See the documentation for more details.
     -- colorscheme that will be used when installing plugins.
