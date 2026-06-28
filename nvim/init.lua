@@ -484,6 +484,20 @@ for _, map in ipairs({
         vim.cmd.wa()
         vim.cmd.source(vim.fn.stdpath("config") .. "/init.lua")
     end },
+    { "<Leader>`", function()
+        dap.repl.toggle({}, "vsplit")
+
+        for _, window_id in pairs(vim.api.nvim_list_wins()) do
+            local name = vim.fn.bufname((vim.api.nvim_win_get_buf(window_id)))
+            vim.notify("got name: "..  name)
+            if name:find("^%[dap%-repl.*%]$") then
+                vim.notify("hit point")
+                vim.api.nvim_set_current_win(window_id)
+                vim.cmd.startinsert()
+                break
+            end
+        end
+    end },
 }) do
     vim.keymap.set("n", map[1], map[2])
 end
