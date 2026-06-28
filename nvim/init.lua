@@ -281,6 +281,12 @@ dap.adapters["lldb"] = {
     command = "lldb-dap",
 }
 
+dap.adapters.gdb = {
+    type = "executable",
+    command = "gdb",
+    args = { "--interpreter=dap" },
+}
+
 local get_project_config = function()
     local config_file = vim.fs.find(".de-config.lua", {
         upward = true,
