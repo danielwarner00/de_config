@@ -156,6 +156,7 @@ vim.o.fillchars = "diff: "
 vim.o.foldlevel = 9999
 vim.o.fsync = false
 vim.o.hlsearch = false
+vim.o.listchars = "tab:» ,trail:-,nbsp:␣"
 vim.o.number = true
 vim.o.relativenumber = true
 vim.o.scrolloff = 9999 -- keep cursor vertically centered
