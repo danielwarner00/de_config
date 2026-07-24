@@ -326,23 +326,54 @@ local get_project_config = function()
     end
 end
 
+-- TODO document project configuration
 local debug_run = function()
     local project_config, directory = get_project_config()
     assert(project_config, "no project config found")
     local debug_config = project_config.debug
     assert(debug_config, "no debug config found")
     -- assert(type(debug_config.type) = "string", ) -- TODO consider asserting
+
+    assert(project_config.targets, "no targets configured for the project")
+
+    assert(debug_config.target, "debug configuration target not set (need project_config.debug.target to be set to an entry in project_config.targets)")
+
+    target = project_config.targets[debug_config.target]
+
+    assert(target, "target %s not found", debug_config.target)
+
     local config = {
         request = "launch",
-        name = "",
+        name = debug_config.target,
     }
 
     for key, value in pairs(debug_config) do
         config[key] = value
     end
 
+    if target.debug_type then
+        config.type = target.debug_type
+    end
+
+    if target.run then
+        config.program = target.run
+    end
+
     if config.program then
         config.program = absolute_path_relative_to(config.program, directory)
+    end
+
+    if config.cwd then
+        config.cwd = absolute_path_relative_to(config.cwd, directory)
+    end
+
+    vim.cmd.wa()
+
+    if target.build then
+        vim.notify("building")
+
+        -- TODO show build output if this fails
+        assert(vim.system(target.build, { cwd = directory }):wait().code == 0)
     end
 
     dap.run(config)
