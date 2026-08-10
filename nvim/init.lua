@@ -328,6 +328,8 @@ end
 
 -- TODO document project configuration
 local debug_run = function()
+    vim.cmd.wa()
+
     local project_config, directory = get_project_config()
     assert(project_config, "no project config found")
     local debug_config = project_config.debug
@@ -366,8 +368,6 @@ local debug_run = function()
     if config.cwd then
         config.cwd = absolute_path_relative_to(config.cwd, directory)
     end
-
-    vim.cmd.wa()
 
     if target.build then
         vim.notify("building")
