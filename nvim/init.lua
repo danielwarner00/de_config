@@ -87,6 +87,10 @@ local gitops = require("gitops")
 
 require("lsp-config")
 
+require("treesitter-context").setup({
+    max_lines = "17%", -- one third of the top half of the screen
+})
+
 local treesitter_languages = {
     "c",
     "cpp",
