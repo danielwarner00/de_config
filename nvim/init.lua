@@ -477,6 +477,7 @@ for _, map in ipairs({
         end
     end },
     { "<Leader>ca", vim.lsp.buf.code_action },
+    { "<Leader>ci", vim.lsp.buf.incoming_calls },
     { "<Leader>co", function()
         local colorschemes = {
             "custom",
