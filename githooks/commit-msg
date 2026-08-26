@@ -13,5 +13,5 @@ if ! echo "$MESSAGE" | rg -q --multiline "\\A.{1,$LIMIT}\\n(\\n|\\z)"; then
     exit 1
 fi
 
-echo "$MESSAGE" | fmt -s -w $LIMIT > "$1"
+echo "$MESSAGE" | fmt -w $LIMIT > "$1"
 rm -f /tmp/badcommit # /tmp/badcommit must be removed so that later commits don't use it as a message template
