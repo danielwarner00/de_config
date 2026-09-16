@@ -477,7 +477,21 @@ for _, map in ipairs({
         end
     end },
     { "<Leader>ca", vim.lsp.buf.code_action },
-    { "<Leader>ci", vim.lsp.buf.incoming_calls },
+    { "<Leader>ci", function()
+        local incoming_calls_handler = vim.lsp.handlers["callHierarchy/incomingCalls"]
+
+        vim.lsp.handlers["callHierarchy/incomingCalls"] = function(err, result, ctx, config)
+            vim.lsp.handlers["callHierarchy/incomingCalls"] = incoming_calls_handler
+
+            incoming_calls_handler(err, result, ctx, config)
+
+            if result and result[1] then
+                vim.cmd.cc()
+            end
+        end
+
+        vim.lsp.buf.incoming_calls()
+    end },
     { "<Leader>co", function()
         local colorschemes = {
             "custom",
