@@ -392,8 +392,16 @@ for _, map in ipairs({
     { "gd", vim.lsp.buf.definition },
     { "gD", vim.lsp.buf.declaration },
     { "K", vim.lsp.buf.hover },
-    { "[d", vim.diagnostic.goto_prev },
-    { "]d", vim.diagnostic.goto_next },
+    { "[d", function()
+        vim.diagnostic.jump({
+            count = 1,
+        })
+    end },
+    { "]d", function()
+        vim.diagnostic.jump({
+            count = -1,
+        })
+    end },
 
     { "<C-p>", telescope_builtin.find_files },
     { "<C-j>", "<C-w>j" },
