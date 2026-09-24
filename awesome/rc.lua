@@ -481,6 +481,27 @@ globalkeys = gears.table.join(
             cycle_stop_callback()
         end,
         { description = "Cycle through editors in current context in multi view", group = "client" }
+    ),
+    awful.key(
+        {},
+        "XF86AudioPlay",
+        function()
+            awful.spawn("playerctl play-pause")
+        end
+    ),
+    awful.key(
+        {},
+        "XF86AudioNext",
+        function()
+            awful.spawn("playerctl next")
+        end
+    ),
+    awful.key(
+        {},
+        "XF86AudioPrev",
+        function()
+            awful.spawn("playerctl previous")
+        end
     )
 )
 
