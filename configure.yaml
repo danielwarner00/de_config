@@ -1,0 +1,142 @@
+- name: Configure general environment
+  hosts: localhost
+  tasks:
+
+  - name: Configure Arch Linx
+    when: ansible_facts.distribution == "Archlinux"
+    block:
+    - name: Install packages
+      become: true
+      community.general.pacman:
+        reason: explicit
+        reason_for: all
+        state: present # TODO consider making this "latest"
+        name:
+        - ansible
+        - awesome
+        - base-devel
+        - clang
+        - gdb
+        - git
+        - impala
+        - iwd
+        - kitty
+        # - linux # TODO consider whether should be included
+        # - linux-firmware # TODO consider whether should be included
+        - man-db
+        - man-pages
+        - neovim
+        - ntp
+        - openssh
+        - otf-monaspace-nerdfonts
+        - playerctl
+        - polkit
+        - ripgrep
+        - rustup
+        - sudo
+        - tree-sitter-cli
+        - xclip
+        - xorg-server
+        - xorg-xinit
+        - xorg-xinput
+
+    - name: Make system symlinks
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        src: "~/de_config/{{ item.target }}"
+        state: link
+        force: true
+      loop:
+      # link X11 files individually because updates to X11 turn /etc/X11/xorg.conf.d
+      # into a directory if it is a symlink
+      - path: /etc/X11/xorg.conf.d/mouse-acceleration.conf
+        target: X11/xorg.conf.d/mouse-acceleration.conf
+      - path: /etc/iwd/main.conf
+        target: arch/iwd-main.conf
+
+    - name: Make user symlinks
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        src: "~/de_config/{{ item.target }}"
+        state: link
+        force: true
+      loop:
+      - path: ~/.xinitrc
+        target: arch/xinitrc
+      - path: ~/.bash_profile
+        target: arch/bash_profile
+
+    - name: Enable and start services
+      ansible.builtin.systemd_service:
+        enabled: true
+        state: "started"
+        name: "{{ item }}"
+      loop:
+      - ntpd.service
+      - iwd.service
+      - systemd-resolved.service
+
+  - name: Configure Mac
+    when: ansible_facts.os_family == "Darwin"
+    block:
+    - name: Install homebrew
+      ansible.builtin.shell:
+        cmd: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        creates: /opt/homebrew/bin/brew
+    - name: Install homebrew packages
+      community.general.homebrew:
+        state: present
+        name:
+        - ansible
+        - bash
+        - font-monaspace-nf
+        - git
+        - ripgrep
+        - rustup
+        - tree-sitter-cli
+  - name: Make ssh directory
+    ansible.builtin.file:
+      path: ~/.ssh
+      state: directory
+  - name: Create default ssh key
+    ansible.builtin.command:
+      cmd: ssh-keygen -t ed25519
+      creates: ~/.ssh/id_ed25519
+      chdir: ~/.ssh
+
+  - name: Get de_config url
+    ansible.builtin.command:
+      cmd: git remote get-url origin
+      chdir: ~/de_config
+    register: de_config_origin_url
+    changed_when: false
+  - name: Use SSH for de_config
+    when: de_config_origin_url.stdout != "git@github.com:danielwarner00/de_config.git"
+    ansible.builtin.command:
+      cmd: git remote set-url origin git@github.com:danielwarner00/de_config.git
+
+  - name: Make ~/.config symlinks
+    ansible.builtin.file:
+      path: "~/.config{{ item }}"
+      src: "~/de_config/{{ item }}"
+      state: link
+      force: true
+    loop:
+    - nvim
+    - awesome
+    - git
+    - kitty
+    - alacritty.toml
+    - clangd
+    - gdb
+
+  - name: Make other symlinks
+    ansible.builtin.file:
+      path: "{{ item.path }}"
+      src: "~/de_config/{{ item.target }}"
+      state: link
+      force: true
+    loop:
+    - path: ~/.bashrc
+      target: bashrc.sh
