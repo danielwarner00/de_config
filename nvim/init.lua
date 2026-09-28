@@ -160,6 +160,7 @@ vim.o.expandtab = true
 vim.o.fillchars = "diff: "
 vim.o.foldlevel = 9999
 vim.o.fsync = false
+vim.go.grepprg = "rg --vimgrep"
 vim.o.hlsearch = false
 vim.o.listchars = "tab:» ,trail:-,nbsp:␣"
 vim.o.number = true
