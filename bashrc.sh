@@ -181,3 +181,5 @@ block () {
 unblock () {
     sed -i "/$1/s/blocked/open/" $TASK_DIR/list.txt
 }
+
+test -f ~/.system-bashrc.sh && . ~/.system-bashrc.sh
