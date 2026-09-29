@@ -104,6 +104,9 @@ local treesitter_languages = {
     "brightscript",
     "typst",
     "gn",
+    "yaml",
+    "json",
+    "toml",
 }
 require("nvim-treesitter").install(treesitter_languages)
 vim.api.nvim_create_autocmd("FileType", {
