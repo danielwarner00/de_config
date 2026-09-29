@@ -1,31 +1,6 @@
 #!/bin/bash
 
-# assumes git and nvim are on $PATH
-
-# add source bashrc.sh to .bashrc
 # following line copied from https://stackoverflow.com/questions/59895
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-SOURCE_DE_BASH="source $SCRIPT_DIR/bashrc.sh"
-
-contains_config=$(grep "$SOURCE_DE_BASH" $HOME/.bashrc)
-if [ -z "${contains_config}" ]; then
-    # does not source bashrc.sh
-   echo $SOURCE_DE_BASH >> $HOME/.bashrc 
-   $SOURCE_DE_BASH
-else
-    echo ".bashrc already sources bashrc.sh - skipping"
-fi
-
-rm -r ~/.config/nvim
-ln -T -s $SCRIPT_DIR/nvim ~/.config/nvim
-ln -T -s $SCRIPT_DIR/awesome ~/.config/awesome
-ln -T -s $SCRIPT_DIR/git ~/.config/git
-ln -T -s $SCRIPT_DIR/kitty ~/.config/kitty
-ln -s $SCRIPT_DIR/alacritty.toml ~/.config/alacritty.toml
-ln -T -s "$SCRIPT_DIR"/clangd ~/.config/clangd
-ln -T -s "$SCRIPT_DIR"/gdb ~/.config/gdb
-
-# link the files individually because updates to X11 turn /etc/X11/xorg.conf.d
-# into a directory if it is a symlink
-sudo ln "$SCRIPT_DIR"/X11/xorg.conf.d/mouse-acceleration.conf /etc/X11/xorg.conf.d
+exec ansible-playbook --ask-become-pass "$SCRIPT_DIR"/configure.yaml
