@@ -1,5 +1,7 @@
 - name: Configure general environment
   hosts: localhost
+  vars:
+    config_directory: "{{ ansible_facts.env.HOME }}/de_config"
   tasks:
 
   - name: Configure Arch Linx
@@ -44,9 +46,8 @@
       become: true
       ansible.builtin.file:
         path: "{{ item.path }}"
-        src: "~/de_config/{{ item.target }}"
+        src: "{{ config_directory }}/{{ item.target }}"
         state: link
-        force: true
       loop:
       # link X11 files individually because updates to X11 turn /etc/X11/xorg.conf.d
       # into a directory if it is a symlink
@@ -58,7 +59,7 @@
     - name: Make user symlinks
       ansible.builtin.file:
         path: "{{ item.path }}"
-        src: "~/de_config/{{ item.target }}"
+        src: "{{ config_directory }}/{{ item.target }}"
         state: link
         force: true
       loop:
@@ -109,7 +110,7 @@
   - name: Get de_config url
     ansible.builtin.command:
       cmd: git remote get-url origin
-      chdir: ~/de_config
+      chdir: "{{ config_directory }}"
     register: de_config_origin_url
     changed_when: false
   - name: Use SSH for de_config
@@ -120,7 +121,7 @@
   - name: Make ~/.config symlinks
     ansible.builtin.file:
       path: "~/.config{{ item }}"
-      src: "~/de_config/{{ item }}"
+      src: "{{ config_directory }}/{{ item }}"
       state: link
       force: true
     loop:
@@ -135,7 +136,7 @@
   - name: Make other symlinks
     ansible.builtin.file:
       path: "{{ item.path }}"
-      src: "~/de_config/{{ item.target }}"
+      src: "{{ config_directory }}/{{ item.target }}"
       state: link
       force: true
     loop:
