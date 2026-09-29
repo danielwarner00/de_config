@@ -79,6 +79,11 @@
             - iwd.service
             - systemd-resolved.service
 
+        - name: Use custom locale
+          ansible.builtin.script: "{{ configure_directory }}/scripts/install_locale.sh"
+          become: true
+          when: ansible_facts.env.LANG != "en_US.UTF-8@de-custom"
+
     - name: Configure Mac
       when: ansible_facts.os_family == "Darwin"
       block:
