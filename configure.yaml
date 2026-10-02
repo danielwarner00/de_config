@@ -125,7 +125,7 @@
 
     - name: Make ~/.config symlinks
       ansible.builtin.file:
-        path: "~/.config{{ item }}"
+        path: "~/.config/{{ item }}"
         src: "{{ config_directory }}/{{ item }}"
         state: link
         force: true
