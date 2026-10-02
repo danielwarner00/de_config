@@ -166,6 +166,8 @@ local fullscreen_tag = awful.tag.add("fullscreen", {
 })
 fullscreen_tag:view_only()
 
+spawn_shell({ tag = fullscreen_tag })
+
 launch_editor_in_directory = function(directory)
     spawn_editor({ tag = fullscreen_tag }, directory)
     fullscreen_tag:view_only()
