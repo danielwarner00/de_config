@@ -42,6 +42,14 @@
               - xorg-xinit
               - xorg-xinput
 
+        - name: Copy system config files
+          become: true
+          ansible.builtin.copy:
+            # this has to be a copy because systemd restricts iwd from reading the home directory
+            src: arch/iwd-main.conf
+            dest: /etc/iwd/main.conf
+            # TODO add hander to call systemctl restart iwd when doing this
+
         - name: Make system symlinks
           become: true
           ansible.builtin.file:
@@ -53,8 +61,6 @@
             # into a directory if it is a symlink
             - path: /etc/X11/xorg.conf.d/mouse-acceleration.conf
               target: X11/xorg.conf.d/mouse-acceleration.conf
-            - path: /etc/iwd/main.conf
-              target: arch/iwd-main.conf
 
         - name: Make user symlinks
           ansible.builtin.file:
