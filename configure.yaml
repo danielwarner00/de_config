@@ -50,6 +50,30 @@
             dest: /etc/iwd/main.conf
             # TODO add hander to call systemctl restart iwd when doing this
 
+        - name: Create getty@tty1 drop-in directory
+          become: true
+          ansible.builtin.file:
+            path: /etc/systemd/system/getty@tty1.service.d
+            state: directory
+            owner: root
+            group: root
+            mode: "0755"
+
+        - name: Install override that skips the username prompt
+          become: true
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/getty@tty1.service.d/override.conf
+            owner: root
+            group: root
+            mode: "0644"
+            # see /usr/lib/systemd/system/getty@.service for the default ExecStart line this is
+            # based off of; this adds --skip-login -o 'daniel' which auto enters the username
+            # 'daniel'
+            content: |
+              [Service]
+              ExecStart=
+              ExecStart=-/usr/bin/agetty --noreset --noclear --skip-login -o 'daniel' - ${TERM}
+
         - name: Make system symlinks
           become: true
           ansible.builtin.file:
