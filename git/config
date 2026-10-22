@@ -27,7 +27,6 @@
 [difftool]
 	prompt = false
 [mergetool]
-	hideResolved = true
 	keepBackup = false
 [mergetool "nvimdiff2"]
     cmd = nvim -d $LOCAL $MERGED $REMOTE -c 'execute \"normal \\<C-W>\\<Right>\"'
