@@ -1,5 +1,5 @@
 export XDG_CONFIG_HOME=~/.config 
-export PATH="~/.local/bin:~/de_config/scripts:$PATH"
+export PATH="$HOME/.local/bin:$HOME/de_config/scripts:$PATH"
 
 shopt -s globstar
 shopt -s failglob
