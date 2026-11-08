@@ -31,6 +31,7 @@
               - ntp
               - openssh
               - otf-monaspace-nerdfonts
+              - pacman-contrib # for paccache command
               - playerctl
               - polkit
               - ripgrep
