@@ -544,6 +544,10 @@ for _, map in ipairs({
     { "<Leader>hS", gitsigns.stage_buffer },
     { "<Leader>hd", function() gitsigns.diffthis(nil, { split = "belowright" }) end },
     { "<Leader>hD", function() gitsigns.diffthis("~", { split = "belowright" }) end },
+    { "<Leader>,", function()
+        vim.cmd.wa()
+        vim.cmd.source("%")
+    end },
     { "<Leader>.", function()
         vim.cmd.wa()
         vim.cmd.source(vim.fn.stdpath("config") .. "/init.lua")
@@ -620,3 +624,53 @@ vim.api.nvim_create_autocmd("User", {
     pattern = "DapProgressUpdate",
     command = "redrawstatus"
 })
+-- it is doable to open a disassembled binary in a buffer,
+-- it would be the buffer opened in readonly mode of the output of
+-- the disassembly command
+
+-- returns path, line or both nil if invalid
+addr2line = function(binary_path, line)
+    -- TODO consider making this asynchronous
+    -- TODO consider elftools (I think) addr2line
+    assert(type(binary_path) == "string")
+    -- assert(type(line) == "number")
+
+    -- result = vim.system({ "addr2line", "-e", binary_path, tostring(line) }, { text = true }):wait()
+    result = vim.system({ "addr2line", "-e", binary_path, line }, { text = true }):wait()
+    assert(result.code == 0, "addr2line command failed, stderr:\n" .. result.stderr)
+
+    -- print(result.stdout)
+    local path, line = result.stdout:match("([^:]+):(%d+)")
+    return path, tonumber(line)
+end
+
+open_binary = function(binary_path, opts)
+    -- TODO consider if I'm using opts
+
+    assert(type(binary_path) == "string")
+    opts = opts or {}
+    assert(type(opts) == "table")
+
+    result = vim.system({ "objdump", "-M", "intel", "-d", "-C", binary_path }, { text = true }):wait()
+    assert(result.code == 0, "objdump command failed, stderr:\n" .. result.stderr)
+
+    local source_buffer_id = vim.api.nvim_get_current_buf()
+
+    vim.cmd.vnew()
+    buffer_id = vim.api.nvim_get_current_buf()
+
+    vim.bo[buffer_id].buftype = "nofile"
+    vim.bo[buffer_id].bufhidden = "wipe" -- TODO consider
+
+    vim.api.nvim_buf_set_lines(buffer_id, 0, -1, false, vim.split(result.stdout, "\n", { trimempty = true }))
+
+    vim.bo[buffer_id].modifiable = false -- TODO consider
+    vim.bo[buffer_id].readonly = true
+
+    -- add autocommand that maps to the source
+    -- use CursorMoved autocommand
+
+    vim.api.nvim_create_autocmd({ "CursorMoved" }, {
+        buffer = buffer_id,
+    }
+end

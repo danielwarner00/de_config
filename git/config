@@ -43,3 +43,6 @@
     showUntrackedFiles = all
 [rebase]
 	autoStash = true
+[user]
+	email = danielwarner00@gmail.com
+	name = Daniel Warner
