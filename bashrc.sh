@@ -34,6 +34,12 @@ gview() {
     nvim -c "View $1"
 }
 
+gfixup() {
+    # $1 is the refspec to fixup
+    git commit --fixup=$1 && \
+        git rebase --autosquash $1~
+}
+
 alias wip="git commit --no-verify -a -m wip"
 # I could make this check whether the previous commit has the message "wip"
 alias uwip="git reset HEAD~"
